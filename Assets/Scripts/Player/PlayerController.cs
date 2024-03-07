@@ -10,9 +10,12 @@ using UnityEngine.UIElements;
 
 namespace YATP
 {
+    public enum PlayerState { Normal, Hidden, Dead, Busy }
+
     public class PlayerController : MonoBehaviour
     {
         public UnityAction<float, float> OnStaminaChanged;
+
 
         public static PlayerController Instance { get; private set; }
 
@@ -91,6 +94,22 @@ namespace YATP
         float characterDefaultHeight;
         float cameraDefaultHeight;
         float cameraCrouchHeight;
+
+        //bool dead = false;
+        //public bool Dead
+        //{
+        //    get { return dead; }
+        //}
+        //bool paused = false;
+        //public bool Paused
+        //{
+        //    get { return paused; }
+        //}
+        PlayerState state;
+        public PlayerState State
+        {
+            get { return state; }
+        }
        
         
         private void Awake()
@@ -121,6 +140,22 @@ namespace YATP
 
         // Update is called once per frame
         void Update()
+        {
+           UpdateState();
+            
+        }
+
+        void UpdateState()
+        {
+            switch(state)
+            {
+                case PlayerState.Normal:
+                    UpdateNormalState();
+                    break;
+            }
+        }
+
+        void UpdateNormalState()
         {
             CheckInput();
 
@@ -350,6 +385,21 @@ namespace YATP
             currentStamina = value;
             currentStamina = Mathf.Clamp(currentStamina, 0, maxStamina);
             OnStaminaChanged?.Invoke(currentStamina, maxStamina);
+        }
+
+        void SetState(PlayerState newState)
+        {
+            if(state == newState) return;
+
+            PlayerState oldState = state;
+            state = newState;
+        }
+
+        public void Die()
+        {
+            Debug.Log("You are dying...");
+            SetState(PlayerState.Dead);
+            
         }
     }
 
