@@ -38,7 +38,7 @@ RenderSettings:
   m_ReflectionIntensity: 1
   m_CustomReflection: {fileID: 0}
   m_Sun: {fileID: 0}
-  m_IndirectSpecularColor: {r: 2166.1252, g: 2276.3245, b: 3321.0396, a: 1}
+  m_IndirectSpecularColor: {r: 2157.802, g: 2262.387, b: 3286.0356, a: 1}
   m_UseRadianceAmbientProbe: 0
 --- !u!157 &3
 LightmapSettings:
@@ -516,7 +516,6 @@ GameObject:
   - component: {fileID: 703465601}
   - component: {fileID: 703465600}
   - component: {fileID: 703465603}
-  - component: {fileID: 703465602}
   - component: {fileID: 703465604}
   - component: {fileID: 703465605}
   m_Layer: 0
@@ -564,20 +563,6 @@ Transform:
   - {fileID: 283568318}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &703465602
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 703465599}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8d72a0bd9c72aad44a98c39c5fefa245, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  warningShotTime: 20
-  deadlyShotTime: 40000
 --- !u!114 &703465603
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -590,8 +575,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fe9ef996422bc747843a0ef581b47ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sightRange: 1
+  sightRange: 400
   shootingRange: 0
+  eyes: {fileID: 883318424}
 --- !u!136 &703465604
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -851,7 +837,7 @@ GameObject:
   - component: {fileID: 883318426}
   - component: {fileID: 883318425}
   m_Layer: 0
-  m_Name: Cube
+  m_Name: Eyes
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2275,7 +2261,7 @@ GameObject:
   - component: {fileID: 6372590785904538621}
   m_Layer: 0
   m_Name: Player
-  m_TagString: Untagged
+  m_TagString: Player
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

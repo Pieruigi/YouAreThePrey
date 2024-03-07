@@ -2,6 +2,8 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.AI;
+using UnityEngine.Apple;
+using UnityEngine.Events;
 
 namespace YATP
 {
@@ -14,6 +16,11 @@ namespace YATP
 
     public class Hunter : MonoBehaviour
     {
+        public UnityAction OnStartChasing;
+        public UnityAction OnStartSeeking;
+
+        public static Hunter Instance { get; private set; }
+
         /// <summary>
         /// Limit at which the hunter can see the player
         /// </summary>
@@ -22,6 +29,9 @@ namespace YATP
 
         [SerializeField]
         float shootingRange = 200;
+
+        [SerializeField]
+        Transform eyes;
 
         NavMeshAgent agent;
         HunterState state = HunterState.Seeking;
@@ -33,7 +43,15 @@ namespace YATP
 
         private void Awake()
         {
-            agent = GetComponent<NavMeshAgent>();
+            if(!Instance)
+            {
+                Instance = this;
+                agent = GetComponent<NavMeshAgent>();
+            }
+            else
+            {
+                Destroy(gameObject);
+            }
         }
 
         // Start is called before the first frame update
@@ -53,16 +71,33 @@ namespace YATP
             switch (state)
             {
                 case HunterState.Seeking:
-                    SeekThePlayer();
+                    SeekPlayer();
                     break;
 
                 case HunterState.CheckingTrail:
                     CheckTrail();
                     break;
+                case HunterState.Chasing:
+                    ChasePlayer();
+                    break;
             }
         }
 
-        void SeekThePlayer()
+        void ChasePlayer()
+        {
+            if(player.State == PlayerState.Dead) 
+                return;
+
+            if (!IsPlayerSpotted())
+            {
+                SetState(HunterState.Seeking);
+                return;
+            }
+
+            agent.SetDestination(player.transform.position);
+        }
+
+        void SeekPlayer()
         {
             if (player.State == PlayerState.Dead)
                 return;
@@ -112,8 +147,26 @@ namespace YATP
 
         bool IsPlayerSpotted()
         {
-            float distance = Vector3.Distance(transform.position, player.transform.position);
+            Vector3 dir = player.transform.position - transform.position;
 
+            // Player is too far
+            if (dir.magnitude > sightRange)
+                return false;
+
+            float angle = Vector3.Angle(transform.forward, Vector3.ProjectOnPlane(dir, Vector3.up));
+            Debug.Log($"Hit - angle:{angle}");
+            // Not in the sight angle
+            if (angle > 70)
+                return false;
+
+            RaycastHit hit;
+            int mask = LayerMask.GetMask(new string[] { "TrailTrigger" });
+            if(Physics.Raycast(eyes.position, player.Camera.transform.position - eyes.position, out hit, sightRange, ~mask))
+            {
+                Debug.Log($"Hit - {hit.collider.name}");
+                if (hit.collider.CompareTag("Player"))
+                    return true;
+            }
 
             return false;
         }
@@ -134,11 +187,16 @@ namespace YATP
             {
                 case HunterState.Seeking:
                     //currentBehaviour = seekingBehaviour;
+                    OnStartSeeking?.Invoke();
                     break;
                 case HunterState.CheckingTrail: 
                     agent.ResetPath();
                     agent.velocity = Vector3.zero;
                 break;
+                case HunterState.Chasing:
+                    agent.ResetPath();
+                    OnStartChasing?.Invoke();
+                    break;
             }
 
             //if(currentBehaviour)

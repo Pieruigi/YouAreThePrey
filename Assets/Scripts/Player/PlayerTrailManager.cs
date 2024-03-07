@@ -22,6 +22,7 @@ namespace YATP
         float elapsedTime = 0;
 
         List<GameObject> trails = new List<GameObject>();
+        bool noTrails = false;
 
         private void Awake()
         {
@@ -39,12 +40,17 @@ namespace YATP
         void Start()
         {
             player = PlayerController.Instance;
+            Hunter.Instance.OnStartChasing += () => { noTrails = true; ClearTrailAll(); };
+            Hunter.Instance.OnStartSeeking += () => { noTrails = false; };
         }
 
         // Update is called once per frame
         void Update()
         {
             if (player.State != PlayerState.Normal)
+                return;
+
+            if (noTrails)
                 return;
 
             elapsedTime += Time.deltaTime;
@@ -80,6 +86,16 @@ namespace YATP
             GameObject trail = Instantiate(trailPrefab, player.transform.position, player.transform.rotation);
             trail.GetComponent<PlayerTrail>().Init(4f);
             trails.Add(trail);
+        }
+
+        void ClearTrailAll()
+        {
+            for (int i = 0; i < trails.Count; i++)
+            {
+                Destroy(trails[i]);
+            }
+
+            trails.Clear();
         }
 
         public void RemoveAllPresiousTrails(GameObject trail)

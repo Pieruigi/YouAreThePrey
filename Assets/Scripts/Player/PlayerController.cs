@@ -48,6 +48,10 @@ namespace YATP
 
         [SerializeField]
         Camera playerCamera;
+        public Camera Camera
+        {
+            get { return playerCamera; }
+        }
 
         [SerializeField]
         float crouchHeight;
