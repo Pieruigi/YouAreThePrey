@@ -518,6 +518,8 @@ GameObject:
   - component: {fileID: 703465603}
   - component: {fileID: 703465604}
   - component: {fileID: 703465605}
+  - component: {fileID: 703465606}
+  - component: {fileID: 703465607}
   m_Layer: 0
   m_Name: Hunter
   m_TagString: Hunter
@@ -575,7 +577,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4fe9ef996422bc747843a0ef581b47ea, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sightRange: 400
+  seekingBehaviour: {fileID: 703465606}
+  checkingTrailBehaviour: {fileID: 703465607}
+  chasingBehaviour: {fileID: 0}
+  sightRange: 200
   shootingRange: 0
   eyes: {fileID: 883318424}
 --- !u!136 &703465604
@@ -628,6 +633,30 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
+--- !u!114 &703465606
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 703465599}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c3a61caed700ee54d8c0992e6b319608, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &703465607
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 703465599}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8d72a0bd9c72aad44a98c39c5fefa245, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &782016065
 GameObject:
   m_ObjectHideFlags: 0

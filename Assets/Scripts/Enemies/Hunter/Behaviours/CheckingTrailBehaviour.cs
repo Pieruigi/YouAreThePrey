@@ -8,21 +8,15 @@ using YATP;
 /// When the hunter is close to the player and the player is not moving away.
 /// The hunter shot once to warn the player... the second shot the player is dead.
 /// </summary>
-public class HidingBehaviour : MonoBehaviour
+public class CheckingTrailBehaviour : MonoBehaviour
 {
 
-    [SerializeField]
-    float warningShotTime = 20f;
-
-    [SerializeField]
-    float deadlyShotTime = 40f;
-
-    float timeElapsed = 0;
-    bool warningShot = false;
-    bool deadlyShot = false;
-
+   
     Hunter hunter;
     PlayerController player;
+
+    float checkingTime = 0;
+    float checkingElapsed = 0;
 
     private void Awake()
     {
@@ -33,30 +27,40 @@ public class HidingBehaviour : MonoBehaviour
     void Start()
     {
         player = PlayerController.Instance;
+       
     }
 
     // Update is called once per frame
     void Update()
     {
-        timeElapsed += Time.deltaTime;
-
-        if(timeElapsed > warningShotTime)
-        {
-            if(!warningShot)
-            {
-                warningShot = true;
-                Debug.Log("WarnThePlayer");
-            }
-        }
-
-        if(timeElapsed > deadlyShotTime)
-        {
-            if (!deadlyShot)
-            {
-                deadlyShot = true;
-                player.Die();
-                Debug.Log("KillThePlayer");
-            }
-        }
+        CheckTrail();       
     }
+
+    private void OnEnable()
+    {
+        hunter.StopAgent();
+    }
+
+    void CheckTrail()
+    {
+        if (hunter.IsPlayerSpotted())
+        {
+            hunter.SetState(HunterState.Chasing);
+            return;
+        }
+
+        checkingElapsed += Time.deltaTime;
+        if (checkingElapsed > checkingTime)
+        {
+            hunter.SetState(HunterState.Seeking);
+        }
+
+    }
+
+    public void SetCheckingTime(float value)
+    {
+        checkingTime = value;
+        checkingElapsed = 0;
+    }
+
 }

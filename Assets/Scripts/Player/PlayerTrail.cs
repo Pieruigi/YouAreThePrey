@@ -38,11 +38,10 @@ namespace YATP
                 // Remove this trail
                 PlayerTrailManager.Instance.RemoveTrail(gameObject);
 
-                Debug.Log("AAAAAAAAAAAAAAAAAAAAAAAAAAAA");
                 if(delay > 0)
                 {
                     Hunter hunter = other.GetComponent<Hunter>();
-                    hunter.SetCheckintTime(delay);
+                    hunter.SetCheckingTrailTime(delay);
                     hunter.SetState(HunterState.CheckingTrail);
                     
                 }

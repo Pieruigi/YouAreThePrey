@@ -12,7 +12,7 @@ namespace YATP
     /// Chasing means the hunter is looking at the player ( is in the shooting range ).
     /// 
     /// </summary>
-    public enum HunterState { Seeking, Chasing, Attacking, CheckingTrail }
+    public enum HunterState { None, Seeking, Chasing, Attacking, CheckingTrail }
 
     public class Hunter : MonoBehaviour
     {
@@ -20,6 +20,15 @@ namespace YATP
         public UnityAction OnStartSeeking;
 
         public static Hunter Instance { get; private set; }
+
+        [SerializeField]
+        SeekingBehaviour seekingBehaviour;
+
+        [SerializeField]
+        CheckingTrailBehaviour checkingTrailBehaviour;
+
+        [SerializeField]
+        ChasingBehaviour chasingBehaviour;
 
         /// <summary>
         /// Limit at which the hunter can see the player
@@ -34,13 +43,11 @@ namespace YATP
         Transform eyes;
 
         NavMeshAgent agent;
-        HunterState state = HunterState.Seeking;
+        HunterState state = HunterState.None;
         MonoBehaviour currentBehaviour;
 
         PlayerController player;
-        float checkingTime;
-        float checkingElapsed;
-
+        
         private void Awake()
         {
             if(!Instance)
@@ -58,94 +65,22 @@ namespace YATP
         void Start()
         {
             player = PlayerController.Instance;
-            SetState((int)HunterState.Seeking); // Should start with none
+            DisableBehaviourAll();
+            SetState(HunterState.Seeking); // Should start with none
         }
 
         private void Update()
         {
-            UpdateState();
         }
 
-        void UpdateState()
+        void DisableBehaviourAll() 
         {
-            switch (state)
-            {
-                case HunterState.Seeking:
-                    SeekPlayer();
-                    break;
-
-                case HunterState.CheckingTrail:
-                    CheckTrail();
-                    break;
-                case HunterState.Chasing:
-                    ChasePlayer();
-                    break;
-            }
+            seekingBehaviour.enabled = false;
+            checkingTrailBehaviour.enabled = false; 
         }
 
-        void ChasePlayer()
-        {
-            if(player.State == PlayerState.Dead) 
-                return;
-
-            if (!IsPlayerSpotted())
-            {
-                SetState(HunterState.Seeking);
-                return;
-            }
-
-            agent.SetDestination(player.transform.position);
-        }
-
-        void SeekPlayer()
-        {
-            if (player.State == PlayerState.Dead)
-                return;
-
-            // Get the player distance
-            
-            if(IsPlayerSpotted())
-            {
-                SetState(HunterState.Chasing);
-                return;
-            }
-
-            // Try to get the older trail 
-            Vector3 destination = Vector3.zero;
-            GameObject olderTrail;
-            bool destinationFound = false;
-            if(PlayerTrailManager.Instance.TryGetOlderTrail(out olderTrail))
-            {
-                destination = olderTrail.transform.position;
-                destinationFound = true;
-            }
-            else
-            {
-                // We are eventually in a building and the player is hiding somewhere, so there won't be new traces at all
-                // We may try to get some waypoint
-            }
-
-            if(destinationFound) 
-                agent.SetDestination(destination);
-        }
-
-        void CheckTrail()
-        {
-            if (IsPlayerSpotted())
-            {
-                SetState(HunterState.Chasing);
-                return;
-            }
-
-            checkingElapsed += Time.deltaTime;
-            if(checkingElapsed > checkingTime)
-            {
-                SetState(HunterState.Seeking);
-            }
-
-        }
-
-        bool IsPlayerSpotted()
+      
+        public bool IsPlayerSpotted()
         {
             Vector3 dir = player.transform.position - transform.position;
 
@@ -154,7 +89,6 @@ namespace YATP
                 return false;
 
             float angle = Vector3.Angle(transform.forward, Vector3.ProjectOnPlane(dir, Vector3.up));
-            Debug.Log($"Hit - angle:{angle}");
             // Not in the sight angle
             if (angle > 70)
                 return false;
@@ -179,37 +113,45 @@ namespace YATP
                 return;
 
             // Disable the current behaviour
-            //if (currentBehaviour)
-            //    currentBehaviour.enabled = false;
+            if (currentBehaviour)
+                currentBehaviour.enabled = false;
 
             this.state = state;
             switch(state)
             {
                 case HunterState.Seeking:
-                    //currentBehaviour = seekingBehaviour;
+                    currentBehaviour = seekingBehaviour;
                     OnStartSeeking?.Invoke();
                     break;
-                case HunterState.CheckingTrail: 
-                    agent.ResetPath();
-                    agent.velocity = Vector3.zero;
-                break;
+                case HunterState.CheckingTrail:
+                    currentBehaviour = checkingTrailBehaviour;
+                    break;
                 case HunterState.Chasing:
-                    agent.ResetPath();
+                    currentBehaviour = chasingBehaviour;
                     OnStartChasing?.Invoke();
                     break;
             }
 
-            //if(currentBehaviour)
-            //    currentBehaviour.enabled = true;
+            if(currentBehaviour)
+                currentBehaviour.enabled = true;
         }
 
-        public void SetCheckintTime(float value)
+        public void SetCheckingTrailTime(float value)
         {
-            checkingTime = value;
-            checkingElapsed = 0;
+            checkingTrailBehaviour.SetCheckingTime(value);
         }
 
+        public void SetDestination(Vector3 destination)
+        {
+            agent.SetDestination(destination);
+        }
 
+        public void StopAgent()
+        {
+            if(!agent) return;
+            agent.ResetPath();
+            agent.velocity = Vector3.zero;
+        }
     }
 
 }
